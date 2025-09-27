@@ -1,47 +1,26 @@
+# reels/admin.py
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Reel, ReelAnalysis
-
-class ReelAnalysisInline(admin.StackedInline):
-    model = ReelAnalysis
-    extra = 0
-    readonly_fields = ['created_at']
 
 @admin.register(Reel)
 class ReelAdmin(admin.ModelAdmin):
-    list_display = ['shortcode', 'influencer', 'views_count', 'likes_count', 
-                   'comments_count', 'vibe_classification', 'is_analyzed', 'post_date']
-    list_filter = ['is_analyzed', 'vibe_classification', 'post_date', 'influencer']
+    list_display = [
+        'shortcode', 'influencer', 'views_count', 'likes_count', 
+        'vibe_classification', 'analysis_status', 'post_date'
+    ]
+    list_filter = ['is_analyzed', 'vibe_classification', 'post_date']
     search_fields = ['shortcode', 'caption', 'influencer__username']
-    readonly_fields = ['reel_id', 'created_at', 'updated_at', 'analysis_date']
-    ordering = ['-post_date']
+    readonly_fields = ['reel_id', 'created_at', 'updated_at']
     
-    inlines = [ReelAnalysisInline]
-    
-    fieldsets = (
-        ('Reel Information', {
-            'fields': ('influencer', 'reel_id', 'shortcode', 'post_date', 'duration')
-        }),
-        ('Content', {
-            'fields': ('video_url', 'thumbnail_url', 'thumbnail_local', 'caption')
-        }),
-        ('Engagement', {
-            'fields': ('views_count', 'likes_count', 'comments_count')
-        }),
-        ('AI Analysis', {
-            'fields': ('detected_events', 'vibe_classification', 'descriptive_tags', 
-                      'is_analyzed', 'analysis_date'),
-            'classes': ('collapse',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        })
-    )
+    def analysis_status(self, obj):
+        if obj.is_analyzed:
+            return format_html('<span style="color: #28a745;">✅ Analyzed</span>')
+        return format_html('<span style="color: #dc3545;">❌ Pending</span>')
+    analysis_status.short_description = 'AI Analysis'
 
 @admin.register(ReelAnalysis)
 class ReelAnalysisAdmin(admin.ModelAdmin):
-    list_display = ['reel', 'primary_subject', 'environment', 'time_of_day', 
-                   'activity_level', 'created_at']
-    list_filter = ['environment', 'time_of_day', 'activity_level', 'created_at']
-    search_fields = ['reel__shortcode', 'reel__influencer__username', 'primary_subject']
-    readonly_fields = ['created_at']
+    list_display = ['reel', 'scene_changes', 'activity_level', 'primary_subject', 'environment']
+    list_filter = ['activity_level', 'environment', 'time_of_day']
+    search_fields = ['reel__shortcode', 'primary_subject']

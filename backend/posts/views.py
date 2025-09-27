@@ -1,53 +1,62 @@
-from rest_framework import viewsets, filters
-from rest_framework.decorators import action
+# posts/views.py
+from rest_framework import viewsets, status
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
-from .models import Post, PostAnalysis
-from .serializers import PostSerializer, PostAnalysisSerializer
+from django.shortcuts import get_object_or_404
+from .models import Post
+from influencers.models import Influencer
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostViewSet(viewsets.ViewSet):
     """
-    Complete CRUD ViewSet for Post model
+    Post ViewSet for API - Supports all post-level data requirements
     """
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['influencer', 'is_analyzed', 'is_video', 'vibe_classification']
-    search_fields = ['caption', 'shortcode', 'influencer__username']
-    ordering_fields = ['likes_count', 'comments_count', 'post_date', 'quality_score']
-    ordering = ['-post_date']
     
-    @action(detail=True, methods=['post'])
-    def analyze(self, request, pk=None):
-        """Trigger AI analysis for specific post"""
-        post = self.get_object()
-        from analytics.tasks import analyze_single_post
-        analyze_single_post.delay(post.id)
-        return Response({'message': 'Analysis initiated for post'})
-    
-    @action(detail=False, methods=['get'])
-    def top_performing(self, request):
-        """Get top performing posts"""
-        top_posts = self.queryset.order_by('-likes_count')[:20]
-        serializer = self.get_serializer(top_posts, many=True)
-        return Response(serializer.data)
-    
-    @action(detail=False, methods=['get'])
-    def by_vibe(self, request):
-        """Get posts grouped by vibe classification"""
-        vibe = request.query_params.get('vibe')
-        if vibe:
-            posts = self.queryset.filter(vibe_classification=vibe)
-            serializer = self.get_serializer(posts, many=True)
-            return Response(serializer.data)
-        return Response({'error': 'Vibe parameter required'}, status=400)
-
-class PostAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Read-only ViewSet for Post Analysis
-    """
-    queryset = PostAnalysis.objects.all()
-    serializer_class = PostAnalysisSerializer
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['category', 'mood']
-    ordering = ['-created_at']
+    def list(self, request):
+        """
+        List all posts or posts for specific influencer
+        Implements IMPORTANT REQUIREMENTS: Post-Level Data
+        """
+        influencer_id = request.query_params.get('influencer')
+        analyzed_only = request.query_params.get('analyzed_only')
+        limit = int(request.query_params.get('limit', 50))
+        
+        if influencer_id:
+            try:
+                influencer = get_object_or_404(Influencer, pk=influencer_id)
+                posts = influencer.posts.all()
+            except:
+                return Response({'error': 'Invalid influencer ID'}, status=400)
+        else:
+            posts = Post.objects.all()
+        
+        if analyzed_only == 'true':
+            posts = posts.filter(is_analyzed=True)
+        
+        posts = posts.order_by('-post_date')[:limit]
+        
+        # Build comprehensive response
+        posts_data = []
+        for post in posts:
+            post_data = {
+                'id': post.id,
+                'influencer_id': post.influencer.id,
+                'influencer_username': post.influencer.username,
+                'post_id': post.post_id,
+                'shortcode': post.shortcode,
+                'image_url': post.image_url,
+                'caption': post.caption,
+                'likes_count': post.likes_count,
+                'comments_count': post.comments_count,
+                'post_date': post.post_date,
+                'is_video': post.is_video,
+                'keywords': post.keywords,
+                'vibe_classification': post.vibe_classification,
+                'quality_score': float(post.quality_score) if post.quality_score else 0.0,
+                'is_analyzed': post.is_analyzed,
+                'analysis_date': post.analysis_date
+            }
+            posts_data.append(post_data)
+        
+        return Response({
+            'count': len(posts_data),
+            'results': posts_data
+        })

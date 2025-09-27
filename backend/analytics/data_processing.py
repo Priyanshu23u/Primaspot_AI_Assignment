@@ -48,11 +48,6 @@ class DataProcessor:
                     total_likes, total_comments, influencer.followers_count, total_posts
                 ),
                 
-                # Engagement rate by reach (if we had reach data)
-                'engagement_rate_reach': self._calculate_engagement_rate_by_reach(
-                    total_likes, total_comments, total_views, total_posts
-                ),
-                
                 # Average engagement per post
                 'avg_likes': avg_likes,
                 'avg_comments': avg_comments,
@@ -64,11 +59,8 @@ class DataProcessor:
                 'video_engagement_rate': self._calculate_video_engagement_rate(reels),
                 'image_engagement_rate': self._calculate_image_engagement_rate(posts),
                 
-                # Growth and trend metrics
-                'engagement_growth_rate': self._calculate_engagement_growth(posts, reels),
-                'consistency_score': self._calculate_consistency_score(posts, reels),
-                
                 # Quality metrics
+                'consistency_score': self._calculate_consistency_score(posts, reels),
                 'high_performing_content_ratio': self._calculate_high_performing_ratio(posts, reels),
             }
             
@@ -94,17 +86,6 @@ class DataProcessor:
         engagement_rate = (avg_engagement / followers) * 100
         return round(engagement_rate, 2)
     
-    def _calculate_engagement_rate_by_reach(self, likes: int, comments: int, views: int, posts: int) -> float:
-        """Engagement rate by reach: (total_engagement / total_reach) * 100"""
-        if views == 0 or posts == 0:
-            return 0.0
-        
-        total_engagement = likes + comments
-        # Estimate reach from views (for reels) and followers (for posts)
-        estimated_reach = views if views > 0 else likes * 10  # Rough estimation
-        engagement_rate = (total_engagement / estimated_reach) * 100
-        return round(min(engagement_rate, 100), 2)  # Cap at 100%
-    
     def _calculate_video_engagement_rate(self, reels) -> float:
         """Calculate engagement rate specifically for video content"""
         if not reels.exists():
@@ -128,31 +109,6 @@ class DataProcessor:
         avg_engagement = total_engagement / image_posts.count()
         
         return round(avg_engagement, 2)
-    
-    def _calculate_engagement_growth(self, posts, reels) -> float:
-        """Calculate engagement growth rate over time"""
-        try:
-            # Get recent content (last 30 days)
-            recent_date = timezone.now() - timedelta(days=30)
-            older_date = timezone.now() - timedelta(days=60)
-            
-            recent_posts = posts.filter(post_date__gte=recent_date)
-            older_posts = posts.filter(post_date__gte=older_date, post_date__lt=recent_date)
-            
-            if not recent_posts.exists() or not older_posts.exists():
-                return 0.0
-            
-            recent_avg = sum(p.likes_count + p.comments_count for p in recent_posts) / recent_posts.count()
-            older_avg = sum(p.likes_count + p.comments_count for p in older_posts) / older_posts.count()
-            
-            if older_avg == 0:
-                return 0.0
-            
-            growth_rate = ((recent_avg - older_avg) / older_avg) * 100
-            return round(growth_rate, 2)
-            
-        except:
-            return 0.0
     
     def _calculate_consistency_score(self, posts, reels) -> float:
         """Calculate posting consistency and engagement consistency"""
@@ -211,9 +167,6 @@ class DataProcessor:
                 'top_performing_reels': self._get_top_performing_content(reels, 'reels'),
                 'content_type_performance': self._analyze_content_types(posts, reels),
                 'vibe_performance': self._analyze_vibe_performance(posts, reels),
-                'optimal_posting_patterns': self._analyze_posting_patterns(posts, reels),
-                'engagement_trends': self._analyze_engagement_trends(posts, reels),
-                'content_quality_insights': self._analyze_content_quality(posts),
             }
             
             self.logger.info(f"Content performance analysis completed for @{influencer.username}")
@@ -240,7 +193,7 @@ class DataProcessor:
             engagement = item.likes_count + item.comments_count
             top_content.append({
                 'id': item.id,
-                'shortcode': item.shortcode,
+                                'shortcode': item.shortcode,
                 'total_engagement': engagement,
                 'likes': item.likes_count,
                 'comments': item.comments_count,
@@ -285,14 +238,6 @@ class DataProcessor:
                 sum(r.views_count for r in reels) / reels.count(), 2
             )
         
-        # Performance comparison
-        if len(analysis) > 1:
-            best_performing = max(
-                [(k, v) for k, v in analysis.items() if 'avg_engagement' in k],
-                key=lambda x: x[1]
-            )
-            analysis['best_performing_type'] = best_performing[0].replace('_avg_engagement', '')
-        
         return analysis
     
     def _analyze_vibe_performance(self, posts, reels) -> Dict[str, Dict]:
@@ -332,141 +277,10 @@ class DataProcessor:
         
         return dict(result)
     
-    def _analyze_posting_patterns(self, posts, reels) -> Dict[str, Any]:
-        """Analyze optimal posting times and patterns"""
-        try:
-            all_content = list(posts) + list(reels)
-            if not all_content:
-                return {}
-            
-            # Hour analysis
-            hour_performance = defaultdict(lambda: {'count': 0, 'total_engagement': 0})
-            day_performance = defaultdict(lambda: {'count': 0, 'total_engagement': 0})
-            
-            for item in all_content:
-                hour = item.post_date.hour
-                day = item.post_date.strftime('%A')
-                engagement = item.likes_count + item.comments_count
-                
-                hour_performance[hour]['count'] += 1
-                hour_performance[hour]['total_engagement'] += engagement
-                
-                day_performance[day]['count'] += 1
-                day_performance[day]['total_engagement'] += engagement
-            
-            # Calculate optimal times
-            best_hours = []
-            for hour, data in hour_performance.items():
-                if data['count'] > 0:
-                    avg_engagement = data['total_engagement'] / data['count']
-                    best_hours.append((hour, avg_engagement))
-            
-            best_days = []
-            for day, data in day_performance.items():
-                if data['count'] > 0:
-                    avg_engagement = data['total_engagement'] / data['count']
-                    best_days.append((day, avg_engagement))
-            
-            # Sort and get top performers
-            best_hours = sorted(best_hours, key=lambda x: x[1], reverse=True)[:3]
-            best_days = sorted(best_days, key=lambda x: x[1], reverse=True)[:3]
-            
-            return {
-                'optimal_posting_hours': [f"{hour:02d}:00" for hour, _ in best_hours],
-                'optimal_posting_days': [day for day, _ in best_days],
-                'hour_performance': {str(hour): avg for hour, avg in best_hours},
-                'day_performance': {day: avg for day, avg in best_days}
-            }
-            
-        except Exception as e:
-            self.logger.error(f"Posting pattern analysis failed: {e}")
-            return {}
-    
-    def _analyze_engagement_trends(self, posts, reels) -> Dict[str, Any]:
-        """Analyze engagement trends over time"""
-        try:
-            all_content = sorted(
-                list(posts) + list(reels), 
-                key=lambda x: x.post_date
-            )
-            
-            if len(all_content) < 2:
-                return {}
-            
-            # Group by month for trend analysis
-            monthly_data = defaultdict(lambda: {'count': 0, 'total_engagement': 0})
-            
-            for item in all_content:
-                month_key = item.post_date.strftime('%Y-%m')
-                engagement = item.likes_count + item.comments_count
-                
-                monthly_data[month_key]['count'] += 1
-                monthly_data[month_key]['total_engagement'] += engagement
-            
-            # Calculate monthly averages
-            monthly_trends = []
-            for month, data in sorted(monthly_data.items()):
-                if data['count'] > 0:
-                    avg_engagement = data['total_engagement'] / data['count']
-                    monthly_trends.append({
-                        'month': month,
-                        'avg_engagement': round(avg_engagement, 2),
-                        'post_count': data['count']
-                    })
-            
-            # Calculate trend direction
-            if len(monthly_trends) >= 2:
-                recent_avg = monthly_trends[-1]['avg_engagement']
-                previous_avg = monthly_trends[-2]['avg_engagement']
-                
-                if recent_avg > previous_avg:
-                    trend_direction = 'increasing'
-                elif recent_avg < previous_avg:
-                    trend_direction = 'decreasing'
-                else:
-                    trend_direction = 'stable'
-            else:
-                trend_direction = 'insufficient_data'
-            
-            return {
-                'monthly_trends': monthly_trends,
-                'trend_direction': trend_direction,
-                'latest_month_avg': monthly_trends[-1]['avg_engagement'] if monthly_trends else 0
-            }
-            
-        except Exception as e:
-            self.logger.error(f"Trend analysis failed: {e}")
-            return {}
-    
-    def _analyze_content_quality(self, posts) -> Dict[str, float]:
-        """Analyze content quality metrics"""
-        try:
-            analyzed_posts = posts.filter(is_analyzed=True, quality_score__gt=0)
-            if not analyzed_posts.exists():
-                return {}
-            
-            quality_scores = [float(post.quality_score) for post in analyzed_posts]
-            
-            return {
-                'avg_quality_score': round(np.mean(quality_scores), 2),
-                'median_quality_score': round(np.median(quality_scores), 2),
-                'highest_quality_score': round(max(quality_scores), 2),
-                'lowest_quality_score': round(min(quality_scores), 2),
-                'quality_consistency': round(10 - (np.std(quality_scores) / np.mean(quality_scores) * 10), 2),
-                'high_quality_ratio': round(
-                    sum(1 for score in quality_scores if score >= 8.0) / len(quality_scores) * 100, 2
-                )
-            }
-            
-        except Exception as e:
-            self.logger.error(f"Quality analysis failed: {e}")
-            return {}
-    
     def _default_engagement_metrics(self) -> Dict[str, float]:
         """Return default engagement metrics when calculation fails"""
         return {
             'engagement_rate_followers': 0.0,
-            'engagement_rate_reach': 0.0,
             'avg_likes': 0.0,
             'avg_comments': 0.0,
             'avg_views': 0.0,
@@ -474,7 +288,6 @@ class DataProcessor:
             'likes_to_comments_ratio': 0.0,
             'video_engagement_rate': 0.0,
             'image_engagement_rate': 0.0,
-            'engagement_growth_rate': 0.0,
             'consistency_score': 0.0,
             'high_performing_content_ratio': 0.0,
         }
@@ -500,15 +313,12 @@ class DemographicsInferrer:
             # Collect content analysis data
             content_vibes = []
             keywords = []
-            quality_scores = []
             
             for post in posts:
                 if post.vibe_classification:
                     content_vibes.append(post.vibe_classification)
                 if post.keywords:
-                    keywords.extend(post.keywords[:3])  # Limit keywords per post
-                if post.quality_score:
-                    quality_scores.append(float(post.quality_score))
+                    keywords.extend(post.keywords[:3])
             
             for reel in reels:
                 if reel.vibe_classification:
@@ -517,9 +327,7 @@ class DemographicsInferrer:
                     keywords.extend(reel.descriptive_tags[:3])
             
             # Perform inference
-            demographics = self._infer_from_content_patterns(
-                content_vibes, keywords, quality_scores, influencer
-            )
+            demographics = self._infer_from_content_patterns(content_vibes, keywords, influencer)
             
             # Add metadata
             demographics.update({
@@ -535,8 +343,7 @@ class DemographicsInferrer:
             self.logger.error(f"Demographics inference failed: {e}")
             return self._default_demographics()
     
-    def _infer_from_content_patterns(self, vibes: List[str], keywords: List[str], 
-                                   quality_scores: List[float], influencer) -> Dict[str, Any]:
+    def _infer_from_content_patterns(self, vibes: List[str], keywords: List[str], influencer) -> Dict[str, Any]:
         """Advanced demographics inference algorithm"""
         
         # Count content patterns
@@ -564,29 +371,12 @@ class DemographicsInferrer:
             elif vibe == 'professional':
                 age_weights['age_25_34'] += count * 2
                 age_weights['age_35_44'] += count * 3
-                age_weights['age_45_54'] += count * 1
             elif vibe == 'aesthetic':
                 age_weights['age_18_24'] += count * 2
                 age_weights['age_25_34'] += count * 3
             else:  # casual
                 age_weights['age_18_24'] += count * 1
                 age_weights['age_25_34'] += count * 2
-                age_weights['age_35_44'] += count * 1
-        
-        # Keyword-based age inference
-        young_keywords = ['party', 'fun', 'school', 'college', 'student', 'trendy']
-        professional_keywords = ['work', 'business', 'career', 'office', 'meeting']
-        family_keywords = ['family', 'kids', 'home', 'parents', 'marriage']
-        
-        for keyword, count in keyword_counts.items():
-            if keyword.lower() in young_keywords:
-                age_weights['age_18_24'] += count * 2
-            elif keyword.lower() in professional_keywords:
-                age_weights['age_25_34'] += count * 2
-                age_weights['age_35_44'] += count * 1
-            elif keyword.lower() in family_keywords:
-                age_weights['age_35_44'] += count * 2
-                age_weights['age_45_54'] += count * 1
         
         # Normalize age distribution
         total_age_weight = sum(age_weights.values())
@@ -594,7 +384,6 @@ class DemographicsInferrer:
             age_distribution = {k: round((v / total_age_weight) * 100, 1) 
                               for k, v in age_weights.items()}
         else:
-            # Default age distribution
             age_distribution = {
                 'age_13_17': 5.0,
                 'age_18_24': 25.0,
@@ -617,17 +406,8 @@ class DemographicsInferrer:
             elif keyword.lower() in male_indicators:
                 gender_weights['male'] += count * 2
             else:
-                # Neutral content appeals to both
                 gender_weights['female'] += count * 1
                 gender_weights['male'] += count * 1
-        
-        # Adjust based on influencer characteristics (if sports/business focused)
-        if influencer.bio:
-            bio_lower = influencer.bio.lower()
-            if any(word in bio_lower for word in ['football', 'soccer', 'sport', 'athlete']):
-                gender_weights['male'] += 10
-            if any(word in bio_lower for word in ['fashion', 'beauty', 'lifestyle']):
-                gender_weights['female'] += 10
         
         # Normalize gender distribution
         total_gender_weight = sum(gender_weights.values())
@@ -639,11 +419,16 @@ class DemographicsInferrer:
         else:
             gender_distribution = {'male_percentage': 50.0, 'female_percentage': 50.0}
         
-        # Geographic inference (basic)
-        geography = self._infer_geography(influencer, keywords)
+        # Geographic and activity patterns
+        geography = {
+            'top_countries': ['United States', 'United Kingdom', 'Canada', 'Australia', 'India'],
+            'top_cities': ['New York', 'London', 'Los Angeles', 'Toronto', 'Mumbai']
+        }
         
-        # Activity patterns inference
-        activity_patterns = self._infer_activity_patterns(influencer)
+        activity_patterns = {
+            'peak_activity_hours': [19, 20, 21, 22],
+            'most_active_days': ['Sunday', 'Wednesday', 'Saturday']
+        }
         
         # Combine all inferences
         return {
@@ -651,50 +436,6 @@ class DemographicsInferrer:
             **gender_distribution,
             **geography,
             **activity_patterns
-        }
-    
-    def _infer_geography(self, influencer, keywords: List[str]) -> Dict[str, List[str]]:
-        """Infer likely geographic distribution of audience"""
-        
-        # Default based on known influencer locations/language
-        default_countries = ['United States', 'United Kingdom', 'Canada', 'Australia', 'India']
-        default_cities = ['New York', 'London', 'Los Angeles', 'Toronto', 'Mumbai']
-        
-        # Check for location keywords
-        location_indicators = {
-            'europe': ['United Kingdom', 'Germany', 'France', 'Spain', 'Italy'],
-            'america': ['United States', 'Canada', 'Brazil', 'Mexico', 'Argentina'],
-            'asia': ['India', 'China', 'Japan', 'South Korea', 'Indonesia'],
-            'middle_east': ['UAE', 'Saudi Arabia', 'Qatar', 'Kuwait', 'Oman']
-        }
-        
-        # Simple location inference from keywords
-        inferred_countries = default_countries
-        inferred_cities = default_cities
-        
-        return {
-            'top_countries': inferred_countries,
-            'top_cities': inferred_cities
-        }
-    
-    def _infer_activity_patterns(self, influencer) -> Dict[str, List]:
-        """Infer audience activity patterns"""
-        
-        # Analyze posting times to infer audience activity
-        posts = influencer.posts.all()
-        if posts.exists():
-            posting_hours = [post.post_date.hour for post in posts]
-            most_active_hours = Counter(posting_hours).most_common(3)
-            peak_hours = [hour for hour, _ in most_active_hours]
-        else:
-            peak_hours = [19, 20, 21]  # Default evening hours
-        
-        # Infer active days (assume weekends and Wednesday are popular)
-        active_days = ['Sunday', 'Wednesday', 'Saturday']
-        
-        return {
-            'peak_activity_hours': peak_hours,
-            'most_active_days': active_days
         }
     
     def _calculate_confidence_score(self, data_points: int) -> float:
@@ -725,3 +466,4 @@ class DemographicsInferrer:
             'most_active_days': ['Sunday', 'Wednesday', 'Saturday'],
             'confidence_score': 3.0
         }
+

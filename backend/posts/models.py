@@ -1,67 +1,91 @@
+# posts/models.py
 from django.db import models
+from django.contrib.postgres.fields import ArrayField
 from influencers.models import Influencer
-import json
 
 class Post(models.Model):
+    """
+    Post Model - Stores post-level data (IMPORTANT REQUIREMENTS)
+    """
+    # Relationships
     influencer = models.ForeignKey(Influencer, on_delete=models.CASCADE, related_name='posts')
-    post_id = models.CharField(max_length=100, unique=True)
-    shortcode = models.CharField(max_length=50)
     
-    # Post content
-    image_url = models.URLField()
-    image_local = models.ImageField(upload_to='post_images/', blank=True, null=True)
-    caption = models.TextField(blank=True)
+    # Basic Post Data (IMPORTANT REQUIREMENTS)
+    post_id = models.CharField(max_length=100, unique=True, db_index=True)
+    shortcode = models.CharField(max_length=50, unique=True, db_index=True)
+    image_url = models.URLField(max_length=500)
+    caption = models.TextField(blank=True, null=True)
     
-    # Engagement metrics (mandatory)
-    likes_count = models.PositiveIntegerField(default=0)
-    comments_count = models.PositiveIntegerField(default=0)
+    # Engagement Data (IMPORTANT REQUIREMENTS)
+    likes_count = models.BigIntegerField(default=0, db_index=True)
+    comments_count = models.BigIntegerField(default=0, db_index=True)
+    post_date = models.DateTimeField(db_index=True)
     
-    # Post metadata
-    post_date = models.DateTimeField()
+    # Post Metadata
     is_video = models.BooleanField(default=False)
+    video_url = models.URLField(max_length=500, blank=True, null=True)
     
-    # AI Analysis fields (important requirement)
-    keywords = models.JSONField(default=list, blank=True)  # Auto-generated tags
-    vibe_classification = models.CharField(max_length=50, blank=True)  # casual, aesthetic, luxury, energetic
-    quality_score = models.DecimalField(max_digits=3, decimal_places=2, default=0)  # 0-10 scale
+    # AI/ML Analysis Results (IMPORTANT REQUIREMENTS - Point 2)
+    keywords = ArrayField(models.CharField(max_length=50), default=list, blank=True)
+    vibe_classification = models.CharField(max_length=50, blank=True, null=True, db_index=True)
+    quality_score = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
     
-    # Analysis metadata
-    is_analyzed = models.BooleanField(default=False)
-    analysis_date = models.DateTimeField(null=True, blank=True)
+    # Analysis Status
+    is_analyzed = models.BooleanField(default=False, db_index=True)
+    analysis_date = models.DateTimeField(blank=True, null=True)
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
+        db_table = 'posts'
         ordering = ['-post_date']
-        
+        indexes = [
+            models.Index(fields=['influencer', '-post_date']),
+            models.Index(fields=['likes_count']),
+            models.Index(fields=['vibe_classification']),
+            models.Index(fields=['is_analyzed']),
+        ]
+    
     def __str__(self):
         return f"{self.influencer.username} - {self.shortcode}"
     
-    def set_keywords(self, keywords_list):
-        """Store keywords as JSON"""
-        self.keywords = keywords_list
-        
-    def get_keywords(self):
-        """Retrieve keywords as list"""
-        return self.keywords if isinstance(self.keywords, list) else []
+    @property
+    def engagement_total(self):
+        return self.likes_count + self.comments_count
+    
+    @property
+    def engagement_rate(self):
+        if self.influencer.followers_count > 0:
+            return (self.engagement_total / self.influencer.followers_count) * 100
+        return 0
 
 class PostAnalysis(models.Model):
-    """Detailed analysis results for posts"""
+    """
+    Detailed AI Analysis for Posts (IMPORTANT REQUIREMENTS - Point 2)
+    """
     post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='analysis')
     
-    # Image quality metrics
-    lighting_score = models.DecimalField(max_digits=3, decimal_places=2, default=0)
-    composition_score = models.DecimalField(max_digits=3, decimal_places=2, default=0)
-    visual_appeal_score = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+    # Image Quality Metrics (IMPORTANT REQUIREMENTS)
+    lighting_score = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
+    composition_score = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
+    visual_appeal_score = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
     
-    # Detected objects/elements
-    detected_objects = models.JSONField(default=list)
-    dominant_colors = models.JSONField(default=list)
+    # AI Detection Results
+    detected_objects = ArrayField(models.CharField(max_length=50), default=list, blank=True)
+    dominant_colors = ArrayField(models.CharField(max_length=7), default=list, blank=True)  # Hex colors
     
-    # Content categorization
-    category = models.CharField(max_length=50, blank=True)  # food, travel, fashion, etc.
-    mood = models.CharField(max_length=50, blank=True)     # happy, professional, relaxed, etc.
+    # Content Classification
+    category = models.CharField(max_length=50, blank=True, null=True)
+    mood = models.CharField(max_length=50, blank=True, null=True)
     
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'post_analyses'
+    
+    def __str__(self):
+        return f"Analysis for {self.post.shortcode}"

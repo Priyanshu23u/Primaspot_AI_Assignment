@@ -1,293 +1,249 @@
+# scraping/instagram_scraper.py
+import instaloader
 import requests
+from bs4 import BeautifulSoup
 import json
 import time
 import random
-import logging
-from urllib.parse import quote
-from django.conf import settings
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-from fake_useragent import UserAgent
-import undetected_chromedriver as uc
 from datetime import datetime
-import instaloader
+from django.utils import timezone
+import logging
 
 logger = logging.getLogger('scraping')
 
 class InstagramScraper:
     """
-    WORKING Instagram scraper using multiple methods for 2025
+    COMPLETE Instagram Data Scraper - Point 1 Implementation
+    Handles all Instagram data collection requirements
     """
     
     def __init__(self):
-        self.session = requests.Session()
-        self.driver = None
-        self.insta_loader = instaloader.Instaloader()
-        self._setup_session()
-        self.ua = UserAgent()
+        self.loader = instaloader.Instaloader()
+        self.logger = logger
         
-    def _setup_session(self):
-        """Setup requests session with rotating headers"""
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-        })
+        # Configure instaloader
+        self.loader.context.request_timeout = 30.0
+        self.loader.context.sleep = True
+        
+        # Rate limiting
+        self.request_delay = random.uniform(2, 5)
     
-    def _setup_selenium(self):
-        """Setup undetected Chrome driver"""
-        try:
-            options = uc.ChromeOptions()
-            options.add_argument('--headless')
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
-            options.add_argument('--disable-blink-features=AutomationControlled')
-            options.add_argument(f'--user-agent={self.ua.random}')
-            
-            self.driver = uc.Chrome(options=options)
-            self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to setup Selenium: {e}")
-            return False
-    
-    def scrape_user_profile(self, username: str) -> dict:
+    def scrape_influencer_profile(self, username: str) -> dict:
         """
-        WORKING method to scrape user profile using Instaloader + GraphQL fallback
+        Scrape MANDATORY basic information for influencer
+        Returns: Basic Information (MANDATORY REQUIREMENTS)
         """
         try:
-            # Method 1: Try Instaloader (most reliable)
-            profile_data = self._scrape_with_instaloader(username)
-            if profile_data:
-                return profile_data
+            self.logger.info(f"Starting profile scrape for @{username}")
             
-            # Method 2: Try GraphQL API
-            profile_data = self._scrape_with_graphql(username)
-            if profile_data:
-                return profile_data
+            # Load profile
+            profile = instaloader.Profile.from_username(self.loader.context, username)
             
-            # Method 3: Try Selenium as fallback
-            profile_data = self._scrape_with_selenium(username)
-            return profile_data
-            
-        except Exception as e:
-            logger.error(f"All profile scraping methods failed for {username}: {e}")
-            return None
-    
-    def _scrape_with_instaloader(self, username: str) -> dict:
-        """Use Instaloader library - most reliable method"""
-        try:
-            profile = instaloader.Profile.from_username(self.insta_loader.context, username)
-            
-            return {
+            # Extract MANDATORY basic information
+            profile_data = {
                 'username': profile.username,
                 'full_name': profile.full_name or '',
-                'biography': profile.biography or '',
                 'profile_pic_url': profile.profile_pic_url,
+                'bio': profile.biography or '',
+                
+                # MANDATORY follower metrics
                 'followers_count': profile.followers,
                 'following_count': profile.followees,
                 'posts_count': profile.mediacount,
+                
+                # Verification & status
                 'is_verified': profile.is_verified,
                 'is_private': profile.is_private,
-                'website': profile.external_url or '',
-            }
-        except Exception as e:
-            logger.warning(f"Instaloader failed for {username}: {e}")
-            return None
-    
-    def _scrape_with_graphql(self, username: str) -> dict:
-        """Use Instagram GraphQL API - working 2025 method"""
-        try:
-            url = f"https://www.instagram.com/api/v1/users/web_profile_info/?username={username}"
-            headers = {
-                'User-Agent': self.ua.random,
-                'x-ig-app-id': '936619743392459',
-                'x-requested-with': 'XMLHttpRequest',
-                'x-asbd-id': '198387',
-                'x-ig-www-claim': '0',
+                'is_business': profile.is_business_account,
+                
+                # Metadata
+                'last_scraped': timezone.now(),
+                'scrape_success': True
             }
             
-            response = self.session.get(url, headers=headers)
+            self.logger.info(f"Profile scraped successfully: @{username}")
+            return profile_data
             
-            if response.status_code == 200:
-                data = response.json()['data']['user']
-                return {
-                    'username': data.get('username'),
-                    'full_name': data.get('full_name', ''),
-                    'biography': data.get('biography', ''),
-                    'profile_pic_url': data.get('profile_pic_url_hd', ''),
-                    'followers_count': data['edge_followed_by']['count'],
-                    'following_count': data['edge_follow']['count'],
-                    'posts_count': data['edge_owner_to_timeline_media']['count'],
-                    'is_verified': data.get('is_verified', False),
-                    'is_private': data.get('is_private', False),
-                    'website': data.get('external_url', ''),
-                }
-            
-            return None
-            
+        except instaloader.exceptions.ProfileNotExistsException:
+            self.logger.error(f"Profile @{username} does not exist")
+            return {'scrape_success': False, 'error': 'Profile not found'}
+        except instaloader.exceptions.PrivateProfileNotFollowedException:
+            self.logger.error(f"Profile @{username} is private")
+            return {'scrape_success': False, 'error': 'Private profile'}
         except Exception as e:
-            logger.warning(f"GraphQL scraping failed for {username}: {e}")
-            return None
+            self.logger.error(f"Profile scraping failed for @{username}: {e}")
+            return {'scrape_success': False, 'error': str(e)}
     
-    def scrape_user_posts(self, username: str, max_posts: int = 12) -> list:
+    def scrape_recent_posts(self, username: str, limit: int = 12) -> list:
         """
-        WORKING method to scrape user posts
+        Scrape IMPORTANT post-level data
+        Returns: Recent posts with IMPORTANT REQUIREMENTS data
         """
         try:
-            # Method 1: Try Instaloader
-            posts = self._scrape_posts_instaloader(username, max_posts)
-            if posts:
-                return posts
+            self.logger.info(f"Starting posts scrape for @{username}, limit: {limit}")
             
-            # Method 2: Try GraphQL
-            posts = self._scrape_posts_graphql(username, max_posts)
-            return posts
+            profile = instaloader.Profile.from_username(self.loader.context, username)
+            posts_data = []
             
-        except Exception as e:
-            logger.error(f"Post scraping failed for {username}: {e}")
-            return []
-    
-    def _scrape_posts_instaloader(self, username: str, max_posts: int) -> list:
-        """Scrape posts using Instaloader"""
-        try:
-            profile = instaloader.Profile.from_username(self.insta_loader.context, username)
-            posts = []
+            # Get recent posts
+            posts = profile.get_posts()
+            count = 0
             
-            for post in profile.get_posts():
-                if len(posts) >= max_posts:
+            for post in posts:
+                if count >= limit:
                     break
                 
-                posts.append({
-                    'post_id': str(post.mediaid),
-                    'shortcode': post.shortcode,
-                    'image_url': post.url,
-                    'caption': post.caption or '',
-                    'likes_count': post.likes,
-                    'comments_count': post.comments,
-                    'post_date': int(post.date.timestamp()),
-                    'is_video': post.is_video,
-                })
-                
-                # Add delay to avoid rate limiting
-                time.sleep(random.uniform(1, 3))
-            
-            return posts
-            
-        except Exception as e:
-            logger.warning(f"Instaloader post scraping failed: {e}")
-            return []
-    
-    def _scrape_posts_graphql(self, username: str, max_posts: int) -> list:
-        """Scrape posts using GraphQL API"""
-        try:
-            # First get user ID
-            profile_url = f"https://www.instagram.com/{username}/"
-            response = self.session.get(profile_url)
-            
-            # Extract user ID from page source
-            if 'profilePage_' in response.text:
-                start = response.text.find('profilePage_') + 12
-                end = response.text.find('"', start)
-                user_id = response.text[start:end]
-            else:
-                return []
-            
-            # Get posts using GraphQL
-            variables = json.dumps({
-                'id': user_id,
-                'first': max_posts,
-            })
-            
-            graphql_url = "https://www.instagram.com/graphql/query/"
-            params = {
-                'query_hash': 'e769aa130647d2354c40ea6a439bfc08',
-                'variables': variables
-            }
-            
-            headers = {
-                'User-Agent': self.ua.random,
-                'x-ig-app-id': '936619743392459',
-            }
-            
-            response = self.session.get(graphql_url, params=params, headers=headers)
-            
-            if response.status_code == 200:
-                data = response.json()
-                posts = []
-                
-                for edge in data['data']['user']['edge_owner_to_timeline_media']['edges']:
-                    node = edge['node']
-                    caption = ''
-                    
-                    if node.get('edge_media_to_caption', {}).get('edges'):
-                        caption = node['edge_media_to_caption']['edges'][0]['node']['text']
-                    
-                    posts.append({
-                        'post_id': node['id'],
-                        'shortcode': node['shortcode'],
-                        'image_url': node['display_url'],
-                        'caption': caption,
-                        'likes_count': node['edge_liked_by']['count'],
-                        'comments_count': node['edge_media_to_comment']['count'],
-                        'post_date': node['taken_at_timestamp'],
-                        'is_video': node['is_video'],
-                    })
-                
-                return posts
-            
-            return []
-            
-        except Exception as e:
-            logger.warning(f"GraphQL posts scraping failed: {e}")
-            return []
-    
-    def scrape_user_reels(self, username: str, max_reels: int = 5) -> list:
-        """
-        WORKING method to scrape user reels
-        """
-        try:
-            profile = instaloader.Profile.from_username(self.insta_loader.context, username)
-            reels = []
-            
-            # Get posts and filter for videos/reels
-            for post in profile.get_posts():
-                if len(reels) >= max_reels:
-                    break
-                
-                if post.is_video:
-                    reels.append({
-                        'reel_id': str(post.mediaid),
+                try:
+                    # IMPORTANT post-level data
+                    post_data = {
+                        'post_id': str(post.mediaid),
                         'shortcode': post.shortcode,
-                        'video_url': post.video_url,
-                        'thumbnail_url': post.url,
+                        'image_url': post.url,
                         'caption': post.caption or '',
-                        'views_count': post.video_view_count or 0,
+                        
+                        # IMPORTANT engagement data
                         'likes_count': post.likes,
                         'comments_count': post.comments,
-                        'post_date': int(post.date.timestamp()),
-                        'duration': post.video_duration or 0,
-                    })
+                        'post_date': post.date_utc,
+                        
+                        # Post metadata
+                        'is_video': post.is_video,
+                        'video_url': post.video_url if post.is_video else None,
+                        
+                        # Analysis placeholders
+                        'keywords': [],
+                        'vibe_classification': None,
+                        'quality_score': 0.0,
+                        'is_analyzed': False
+                    }
                     
-                    time.sleep(random.uniform(1, 3))
+                    posts_data.append(post_data)
+                    count += 1
+                    
+                    # Rate limiting
+                    time.sleep(self.request_delay)
+                    
+                except Exception as e:
+                    self.logger.error(f"Error scraping post {post.shortcode}: {e}")
+                    continue
             
-            return reels
+            self.logger.info(f"Scraped {len(posts_data)} posts for @{username}")
+            return posts_data
             
         except Exception as e:
-            logger.error(f"Reel scraping failed for {username}: {e}")
+            self.logger.error(f"Posts scraping failed for @{username}: {e}")
             return []
     
-    def close(self):
-        """Clean up resources"""
-        if self.driver:
-            self.driver.quit()
+    def scrape_recent_reels(self, username: str, limit: int = 8) -> list:
+        """
+        Scrape ADVANCED reels/video-level data
+        Returns: Recent reels with ADVANCED REQUIREMENTS data
+        """
+        try:
+            self.logger.info(f"Starting reels scrape for @{username}, limit: {limit}")
+            
+            profile = instaloader.Profile.from_username(self.loader.context, username)
+            reels_data = []
+            
+            # Get recent posts that are videos/reels
+            posts = profile.get_posts()
+            count = 0
+            
+            for post in posts:
+                if count >= limit:
+                    break
+                
+                # Only process videos/reels
+                if not post.is_video:
+                    continue
+                
+                try:
+                    # Check if it's a reel (video with certain characteristics)
+                    is_reel = post.video_duration and post.video_duration <= 90
+                    
+                    if is_reel:
+                        # ADVANCED reel data
+                        reel_data = {
+                            'reel_id': str(post.mediaid),
+                            'shortcode': post.shortcode,
+                            'video_url': post.video_url,
+                            'thumbnail_url': post.url,
+                            'caption': post.caption or '',
+                            
+                            # ADVANCED engagement data
+                            'views_count': post.video_view_count or 0,
+                            'likes_count': post.likes,
+                            'comments_count': post.comments,
+                            'post_date': post.date_utc,
+                            
+                            # Video metadata
+                            'duration': int(post.video_duration) if post.video_duration else 0,
+                            
+                            # Analysis placeholders
+                            'detected_events': [],
+                            'vibe_classification': None,
+                            'descriptive_tags': [],
+                            'is_analyzed': False
+                        }
+                        
+                        reels_data.append(reel_data)
+                        count += 1
+                    
+                    # Rate limiting
+                    time.sleep(self.request_delay)
+                    
+                except Exception as e:
+                    self.logger.error(f"Error scraping reel {post.shortcode}: {e}")
+                    continue
+            
+            self.logger.info(f"Scraped {len(reels_data)} reels for @{username}")
+            return reels_data
+            
+        except Exception as e:
+            self.logger.error(f"Reels scraping failed for @{username}: {e}")
+            return []
+    
+    def scrape_complete_profile(self, username: str) -> dict:
+        """
+        Complete scraping for ALL REQUIREMENTS
+        Returns: All data needed for the web application
+        """
+        try:
+            self.logger.info(f"Starting complete scrape for @{username}")
+            
+            # Scrape profile info (MANDATORY)
+            profile_data = self.scrape_influencer_profile(username)
+            if not profile_data.get('scrape_success'):
+                return profile_data
+            
+            # Scrape posts (IMPORTANT)
+            posts_data = self.scrape_recent_posts(username, limit=15)  # Get 15 for >10 requirement
+            
+            # Scrape reels (ADVANCED)
+            reels_data = self.scrape_recent_reels(username, limit=8)   # Get 8 for >5 requirement
+            
+            # Combine all data
+            complete_data = {
+                **profile_data,
+                'posts': posts_data,
+                'reels': reels_data,
+                'scrape_summary': {
+                    'total_posts_scraped': len(posts_data),
+                    'total_reels_scraped': len(reels_data),
+                    'scraping_completed_at': timezone.now().isoformat(),
+                    'requirements_met': {
+                        'basic_information': True,
+                        'recent_posts_10_plus': len(posts_data) >= 10,
+                        'recent_reels_5_plus': len(reels_data) >= 5
+                    }
+                }
+            }
+            
+            self.logger.info(f"Complete scraping finished for @{username}")
+            self.logger.info(f"  Profile: ✅, Posts: {len(posts_data)}, Reels: {len(reels_data)}")
+            
+            return complete_data
+            
+        except Exception as e:
+            self.logger.error(f"Complete scraping failed for @{username}: {e}")
+            return {'scrape_success': False, 'error': str(e)}

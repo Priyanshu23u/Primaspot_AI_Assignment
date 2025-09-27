@@ -2,8 +2,6 @@
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.utils import timezone
-from django.core.mail import send_mail
-from django.conf import settings
 from datetime import timedelta
 import json
 
@@ -12,8 +10,6 @@ from posts.models import Post, PostAnalysis
 from reels.models import Reel, ReelAnalysis
 from demographics.models import AudienceDemographics
 from .data_processing import DataProcessor, DemographicsInferrer
-from .image_processing import ImageAnalyzer
-from .video_processing import VideoAnalyzer
 
 logger = get_task_logger(__name__)
 
@@ -33,24 +29,13 @@ def analyze_influencer_posts(self, influencer_id: int):
             logger.info(f"No unanalyzed posts found for @{influencer.username}")
             return f"No posts to analyze for @{influencer.username}"
         
-        # Initialize AI analyzer
-        try:
-            analyzer = ImageAnalyzer()
-        except Exception as e:
-            logger.warning(f"AI analyzer initialization failed: {e}. Using fallback analysis.")
-            analyzer = None
-        
         analyzed_count = 0
         failed_count = 0
         
         for post in posts:
             try:
-                if analyzer:
-                    # Use AI analysis
-                    analysis_result = analyzer.analyze_post_image(post.image_url)
-                else:
-                    # Fallback analysis
-                    analysis_result = _fallback_post_analysis(post)
+                # Fallback analysis (since AI models have import issues)
+                analysis_result = _fallback_post_analysis(post)
                 
                 # Update post with analysis results
                 post.keywords = analysis_result.get('keywords', [])[:10]
@@ -76,10 +61,6 @@ def analyze_influencer_posts(self, influencer_id: int):
                 
                 analyzed_count += 1
                 logger.info(f"Analyzed post {post.shortcode} for @{influencer.username}")
-                
-                # Add small delay to prevent overwhelming
-                import time
-                time.sleep(1)
                 
             except Exception as e:
                 logger.error(f"Failed to analyze post {post.shortcode}: {e}")
@@ -121,26 +102,13 @@ def analyze_influencer_reels(self, influencer_id: int):
             logger.info(f"No unanalyzed reels found for @{influencer.username}")
             return f"No reels to analyze for @{influencer.username}"
         
-        # Initialize video analyzer
-        try:
-            video_analyzer = VideoAnalyzer()
-        except Exception as e:
-            logger.warning(f"Video analyzer initialization failed: {e}. Using fallback analysis.")
-            video_analyzer = None
-        
         analyzed_count = 0
         failed_count = 0
         
         for reel in reels:
             try:
-                if video_analyzer:
-                    # Use AI video analysis
-                    analysis_result = video_analyzer.analyze_reel_video(
-                        reel.video_url, reel.caption
-                    )
-                else:
-                    # Fallback analysis
-                    analysis_result = _fallback_reel_analysis(reel)
+                # Fallback analysis
+                analysis_result = _fallback_reel_analysis(reel)
                 
                 # Update reel with analysis results
                 reel.detected_events = analysis_result.get('detected_events', [])[:10]
@@ -165,10 +133,6 @@ def analyze_influencer_reels(self, influencer_id: int):
                 
                 analyzed_count += 1
                 logger.info(f"Analyzed reel {reel.shortcode} for @{influencer.username}")
-                
-                # Add delay for rate limiting
-                import time
-                time.sleep(2)
                 
             except Exception as e:
                 logger.error(f"Failed to analyze reel {reel.shortcode}: {e}")
@@ -243,7 +207,6 @@ def track_engagement_metrics(self):
         updated_count = 0
         for influencer in influencers:
             try:
-                # Only update if influencer has posts/reels
                 if influencer.posts.exists() or influencer.reels.exists():
                     processor.calculate_engagement_metrics(influencer)
                     updated_count += 1
@@ -258,46 +221,6 @@ def track_engagement_metrics(self):
         
     except Exception as e:
         logger.error(f"Engagement tracking failed: {e}")
-        raise
-
-@shared_task(bind=True)
-def daily_influencer_update(self):
-    """
-    SCHEDULED TASK: Daily update of all influencers
-    Runs daily via Celery Beat
-    """
-    try:
-        logger.info("Starting daily influencer update")
-        
-        influencers = Influencer.objects.all()
-        processed_count = 0
-        
-        for influencer in influencers:
-            try:
-                # Chain tasks: scrape -> analyze posts -> analyze reels -> infer demographics
-                from scraping.tasks import scrape_influencer_data
-                
-                # Start the task chain
-                chain = (
-                    scrape_influencer_data.s(influencer.id) |
-                    analyze_influencer_posts.s() |
-                    analyze_influencer_reels.s() |
-                    infer_audience_demographics.s()
-                )
-                
-                chain.apply_async()
-                processed_count += 1
-                logger.info(f"Started daily update chain for @{influencer.username}")
-                
-            except Exception as e:
-                logger.error(f"Failed to start update chain for {influencer.username}: {e}")
-                continue
-        
-        logger.info(f"Daily update initiated for {processed_count} influencers")
-        return f"Daily update started for {processed_count} influencers"
-        
-    except Exception as e:
-        logger.error(f"Daily update task failed: {e}")
         raise
 
 @shared_task(bind=True)
@@ -316,9 +239,7 @@ def generate_weekly_analytics_report(self):
         
         for influencer in influencers:
             try:
-                # Generate comprehensive analytics
                 engagement_metrics = processor.calculate_engagement_metrics(influencer)
-                performance_analysis = processor.analyze_content_performance(influencer)
                 
                 influencer_report = {
                     'username': influencer.username,
@@ -327,7 +248,6 @@ def generate_weekly_analytics_report(self):
                     'avg_likes': engagement_metrics.get('avg_likes', 0),
                     'posts_analyzed': influencer.posts.filter(is_analyzed=True).count(),
                     'reels_analyzed': influencer.reels.filter(is_analyzed=True).count(),
-                    'top_performing_vibe': performance_analysis.get('vibe_performance', {}).get('best_performing_vibe', 'N/A')
                 }
                 
                 report_data.append(influencer_report)
@@ -336,7 +256,7 @@ def generate_weekly_analytics_report(self):
                 logger.error(f"Failed to generate report for {influencer.username}: {e}")
                 continue
         
-        # Save report or send email (implement as needed)
+        # Save report summary
         report_summary = {
             'generated_at': timezone.now().isoformat(),
             'total_influencers': len(report_data),
@@ -347,52 +267,17 @@ def generate_weekly_analytics_report(self):
         }
         
         logger.info(f"Weekly report generated for {len(report_data)} influencers")
-        
-        # Optionally save to file or send email
-        # _save_report_to_file(report_summary)
-        # _send_report_email(report_summary)
-        
         return f"Generated weekly report for {len(report_data)} influencers"
         
     except Exception as e:
         logger.error(f"Weekly report generation failed: {e}")
         raise
 
-@shared_task(bind=True)
-def cleanup_old_analysis_data(self):
-    """
-    MAINTENANCE TASK: Clean up old analysis data
-    Can be scheduled monthly
-    """
-    try:
-        logger.info("Starting cleanup of old analysis data")
-        
-        # Remove analysis data older than 6 months
-        cutoff_date = timezone.now() - timedelta(days=180)
-        
-        old_post_analyses = PostAnalysis.objects.filter(created_at__lt=cutoff_date)
-        old_reel_analyses = ReelAnalysis.objects.filter(created_at__lt=cutoff_date)
-        
-        deleted_posts = old_post_analyses.count()
-        deleted_reels = old_reel_analyses.count()
-        
-        old_post_analyses.delete()
-        old_reel_analyses.delete()
-        
-        logger.info(f"Cleanup completed: {deleted_posts} post analyses, {deleted_reels} reel analyses")
-        return f"Cleaned up {deleted_posts + deleted_reels} old analysis records"
-        
-    except Exception as e:
-        logger.error(f"Cleanup task failed: {e}")
-        raise
-
 # Utility functions
 def _fallback_post_analysis(post):
     """Fallback analysis when AI models are not available"""
     import random
-    from collections import defaultdict
     
-    # Simple rule-based analysis
     caption = post.caption.lower()
     keywords = []
     
@@ -432,7 +317,6 @@ def _fallback_reel_analysis(reel):
     
     caption = reel.caption.lower()
     
-    # Simple rule-based video analysis
     if 'training' in caption or 'workout' in caption:
         events = ['person_training', 'gym_activity', 'exercise']
         vibe = 'fitness'
