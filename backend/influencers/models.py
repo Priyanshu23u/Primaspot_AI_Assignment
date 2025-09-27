@@ -39,6 +39,7 @@ class Influencer(models.Model):
     def __str__(self):
         return f"@{self.username} ({self.followers_count} followers)"
     
+    # Add this method to your Influencer model
     def update_engagement_metrics(self):
         """Calculate and update engagement metrics from posts"""
         posts = self.posts.all()
@@ -53,6 +54,9 @@ class Influencer(models.Model):
             # Engagement rate = (avg_likes + avg_comments) / followers * 100
             if self.followers_count > 0:
                 self.engagement_rate = ((self.avg_likes + self.avg_comments) / self.followers_count) * 100
+            else:
+                self.engagement_rate = 0
             
             self.save()
+
 
