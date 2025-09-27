@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,59 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Instagram Analytics Dashboard</title>
     <meta name="description" content="Advanced AI-powered Instagram analytics and insights platform" />
-    <meta name="keywords" content="instagram, analytics, social media, influencer, marketing, AI, dashboard" />
-    <meta name="author" content="Instagram Analytics Team" />
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://instagram-analytics.com/" />
-    <meta property="og:title" content="Instagram Analytics Dashboard" />
-    <meta property="og:description" content="Advanced AI-powered Instagram analytics and insights platform" />
-    <meta property="og:image" content="/og-image.jpg" />
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://instagram-analytics.com/" />
-    <meta property="twitter:title" content="Instagram Analytics Dashboard" />
-    <meta property="twitter:description" content="Advanced AI-powered Instagram analytics and insights platform" />
-    <meta property="twitter:image" content="/twitter-image.jpg" />
-    
-    <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    
-    <!-- Theme Color -->
-    <meta name="theme-color" content="#3b82f6" />
-    <meta name="msapplication-TileColor" content="#3b82f6">
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Preload critical resources -->
-    <link rel="preload" href="/src/index.css" as="style" />
-    <link rel="preload" href="/src/main.jsx" as="script" />
   </head>
-  <body class="antialiased">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
-            });
-        });
-      }
-    </script>
   </body>
 </html>

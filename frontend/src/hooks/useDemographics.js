@@ -1,5 +1,5 @@
 import { useApi, useApiMutation } from './useApi'
-import { demographicsService } from '../services/demographicsService'
+import { demographicsService } from '../services/demographics'
 
 export const useDemographics = (params = {}) => {
   return useApi(

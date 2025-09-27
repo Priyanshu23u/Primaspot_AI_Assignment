@@ -1,5 +1,5 @@
 import { useApi, useApiMutation } from './useApi'
-import { analyticsService } from '../services/analyticsService'
+import { analyticsService } from '../services/analytics'
 
 export const usePlatformAnalytics = () => {
   return useApi(

@@ -1,5 +1,5 @@
 import { useApi, useApiMutation } from './useApi'
-import { influencerService } from '../services/influencerService'
+import { influencerService } from '../services/influencers'
 
 export const useInfluencers = (params = {}) => {
   return useApi(

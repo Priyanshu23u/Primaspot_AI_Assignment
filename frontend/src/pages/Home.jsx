@@ -1,240 +1,234 @@
-import React from 'react'
+﻿import React from 'react'
 import { Link } from 'react-router-dom'
-import { 
-  ChartBarIcon, 
-  UsersIcon, 
-  PhotoIcon, 
-  PlayIcon,
-  ArrowRightIcon,
-  CheckIcon
-} from '@heroicons/react/24/outline'
-import Button from '../components/common/UI/Button'
-
-const FeatureCard = ({ icon: Icon, title, description }) => (
-  <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-card border border-gray-200 dark:border-gray-700">
-    <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center mb-4">
-      <Icon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-    </div>
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-      {title}
-    </h3>
-    <p className="text-gray-600 dark:text-gray-400">
-      {description}
-    </p>
-  </div>
-)
 
 const Home = () => {
-  const features = [
-    {
-      icon: ChartBarIcon,
-      title: 'Advanced Analytics',
-      description: 'Get deep insights into engagement patterns, growth trends, and performance metrics.'
-    },
-    {
-      icon: UsersIcon,
-      title: 'Influencer Management',
-      description: 'Manage and analyze multiple influencer profiles with comprehensive data tracking.'
-    },
-    {
-      icon: PhotoIcon,
-      title: 'AI-Powered Post Analysis',
-      description: 'Automatic keyword extraction, vibe classification, and quality scoring for posts.'
-    },
-    {
-      icon: PlayIcon,
-      title: 'Video Analytics',
-      description: 'Analyze reels and video content with AI-driven event detection and insights.'
-    }
-  ]
-
-  const benefits = [
-    'Real-time engagement tracking',
-    'AI-powered content analysis',
-    'Comprehensive demographic insights',
-    'Export and reporting capabilities',
-    'Dark mode support',
-    'Responsive design for all devices'
-  ]
+  console.log('Home component is rendering') // Debug log
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Header */}
-      <nav className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">IA</span>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+      {/* Navigation */}
+      <nav style={{ 
+        background: 'rgba(255, 255, 255, 0.95)', 
+        backdropFilter: 'blur(10px)',
+        padding: '16px 0',
+        boxShadow: '0 2px 20px rgba(0,0,0,0.1)'
+      }}>
+        <div style={{ 
+          maxWidth: '1200px', 
+          margin: '0 auto', 
+          padding: '0 20px', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center' 
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ 
+              width: '40px', 
+              height: '40px', 
+              background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              marginRight: '12px'
+            }}>
+              IG
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
+            <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>
               Instagram Analytics
-            </span>
+            </h1>
           </div>
-          <Link to="/app/dashboard">
-            <Button variant="primary" size="lg">
+          <div>
+            <Link 
+              to="/dashboard"
+              style={{
+                background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                fontWeight: '500',
+                textDecoration: 'none'
+              }}
+            >
               Get Started
-              <ArrowRightIcon className="w-4 h-4 ml-2" />
-            </Button>
-          </Link>
+            </Link>
+          </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="px-6 py-20">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-6">
-              Advanced Instagram Analytics{' '}
-              <span className="bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                Dashboard
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-              Harness the power of AI to analyze Instagram content, track engagement, 
-              and gain deep insights into your influencer marketing campaigns.
-            </p>
-            <div className="flex items-center justify-center space-x-4">
-              <Link to="/app/dashboard">
-                <Button variant="instagram" size="xl">
-                  Launch Dashboard
-                  <ArrowRightIcon className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-              <Button variant="outline" size="xl">
-                View Demo
-              </Button>
-            </div>
-          </div>
+      <section style={{ 
+        textAlign: 'center', 
+        padding: '100px 20px',
+        color: 'white'
+      }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h1 style={{ 
+            fontSize: '4rem', 
+            fontWeight: 'bold', 
+            marginBottom: '24px',
+            background: 'linear-gradient(45deg, #ffffff, #e0e7ff)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
+            Instagram Analytics
+            <br />
+            <span style={{ 
+              background: 'linear-gradient(45deg, #f09433, #dc2743)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              Dashboard
+            </span>
+          </h1>
           
-          {/* Hero Stats */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">5M+</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Posts Analyzed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">10K+</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Influencers Tracked</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">99.9%</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Uptime</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-gray-900 dark:text-white">24/7</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">AI Processing</div>
-            </div>
+          <p style={{ 
+            fontSize: '1.25rem', 
+            marginBottom: '40px',
+            opacity: 0.9,
+            lineHeight: '1.6'
+          }}>
+            Advanced AI-powered Instagram analytics platform with real-time insights, 
+            influencer tracking, and comprehensive performance metrics.
+          </p>
+          
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link
+              to="/dashboard"
+              style={{
+                background: 'linear-gradient(45deg, #f09433 0%, #dc2743 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '16px 32px',
+                borderRadius: '12px',
+                fontSize: '18px',
+                fontWeight: '600',
+                textDecoration: 'none',
+                display: 'inline-block',
+                boxShadow: '0 8px 25px rgba(240, 148, 51, 0.3)',
+                transition: 'transform 0.2s ease'
+              }}
+            >
+              🚀 Launch Dashboard
+            </Link>
+            
+            <button style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              padding: '16px 32px',
+              borderRadius: '12px',
+              fontSize: '18px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              backdropFilter: 'blur(10px)'
+            }}>
+              📹 Watch Demo
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="px-6 py-20 bg-white dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Powerful Features
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Everything you need to analyze, understand, and optimize your Instagram presence
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <FeatureCard key={index} {...feature} />
-            ))}
-          </div>
+      {/* Quick Stats */}
+      <section style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gap: '40px', 
+        padding: '80px 20px',
+        maxWidth: '800px',
+        margin: '0 auto',
+        textAlign: 'center',
+        color: 'white'
+      }}>
+        <div>
+          <div style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '8px' }}>5M+</div>
+          <div style={{ opacity: 0.8 }}>Posts Analyzed</div>
         </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="px-6 py-20">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
-                Why Choose Our Platform?
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
-                Our AI-powered analytics platform provides unprecedented insights into Instagram 
-                performance, helping you make data-driven decisions for your social media strategy.
-              </p>
-              <ul className="space-y-4">
-                {benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-center">
-                    <div className="w-6 h-6 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mr-3">
-                      <CheckIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    </div>
-                    <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-gradient-to-br from-pink-100 to-purple-100 dark:from-pink-900/20 dark:to-purple-900/20 rounded-2xl p-8">
-              <div className="space-y-4">
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Engagement Rate</span>
-                    <span className="text-green-600 text-sm">+12.5%</span>
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">4.8%</div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Content Quality</span>
-                    <span className="text-green-600 text-sm">Excellent</span>
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">9.2/10</div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">AI Analysis</span>
-                    <span className="text-blue-600 text-sm">Real-time</span>
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">24/7</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div>
+          <div style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '8px' }}>10K+</div>
+          <div style={{ opacity: 0.8 }}>Influencers Tracked</div>
+        </div>
+        <div>
+          <div style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '8px' }}>99.9%</div>
+          <div style={{ opacity: 0.8 }}>Uptime</div>
+        </div>
+        <div>
+          <div style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '8px' }}>24/7</div>
+          <div style={{ opacity: 0.8 }}>AI Processing</div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="px-6 py-20 bg-gradient-to-r from-pink-600 to-purple-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
+      <section style={{ 
+        background: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)',
+        padding: '80px 20px',
+        textAlign: 'center',
+        color: 'white'
+      }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '20px' }}>
             Ready to Transform Your Instagram Strategy?
           </h2>
-          <p className="text-xl text-pink-100 mb-8">
+          <p style={{ fontSize: '1.25rem', marginBottom: '40px', opacity: 0.9 }}>
             Join thousands of marketers using our platform to drive better results
           </p>
-          <Link to="/app/dashboard">
-            <Button variant="secondary" size="xl">
-              Start Analyzing Now
-              <ArrowRightIcon className="w-5 h-5 ml-2" />
-            </Button>
+          <Link
+            to="/dashboard"
+            style={{
+              background: 'white',
+              color: '#dc2743',
+              border: 'none',
+              padding: '16px 40px',
+              borderRadius: '12px',
+              fontSize: '18px',
+              fontWeight: '700',
+              textDecoration: 'none',
+              display: 'inline-block',
+              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.2)'
+            }}
+          >
+            🚀 Start Analyzing Now - It's Free!
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-12 bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold">IA</span>
+      <footer style={{ 
+        background: '#1e293b',
+        color: 'white',
+        padding: '40px 20px',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+            <div style={{ 
+              width: '32px', 
+              height: '32px', 
+              background: 'linear-gradient(45deg, #f09433 0%, #dc2743 100%)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              marginRight: '12px'
+            }}>
+              IG
             </div>
-            <span className="text-lg font-semibold">Instagram Analytics</span>
+            <span style={{ fontSize: '18px', fontWeight: '600' }}>Instagram Analytics</span>
           </div>
-          <p className="text-gray-400 mb-4">
+          <p style={{ opacity: 0.7, marginBottom: '20px' }}>
             Advanced AI-powered Instagram analytics and insights platform
           </p>
-          <div className="flex items-center justify-center space-x-6 text-sm">
-            <a href="#" className="text-gray-400 hover:text-white">Privacy</a>
-            <a href="#" className="text-gray-400 hover:text-white">Terms</a>
-            <a href="#" className="text-gray-400 hover:text-white">Support</a>
-            <a href="#" className="text-gray-400 hover:text-white">Documentation</a>
+          <div style={{ marginTop: '20px', opacity: 0.6, fontSize: '14px' }}>
+            © 2025 Instagram Analytics. All rights reserved.
           </div>
         </div>
       </footer>

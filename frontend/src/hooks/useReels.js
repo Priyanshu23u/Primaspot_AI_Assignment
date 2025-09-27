@@ -1,5 +1,5 @@
 import { useApi, useApiMutation } from './useApi'
-import { reelService } from '../services/reelService'
+import { reelService } from '../services/reels'
 
 export const useReels = (params = {}) => {
   return useApi(
