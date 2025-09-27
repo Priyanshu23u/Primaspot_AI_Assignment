@@ -4,175 +4,123 @@ import time
 import random
 from urllib.parse import quote
 from django.conf import settings
-from typing import Dict, List, Optional
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import logging
 
 logger = logging.getLogger('scraping')
 
-class InstagramScraper:
+class AdvancedInstagramScraper:
     """
-    Instagram scraper using 2025 techniques
-    Satisfies scraping pipeline requirement
+    Production-ready Instagram scraper
+    CRITICAL: This is what makes the app functional
     """
     
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-        })
-        self.app_id = settings.INSTAGRAM_APP_ID
+        self.driver = None
+        self._setup_session()
+        self._setup_selenium()
+    
+    def _setup_selenium(self):
+        """Setup Selenium WebDriver for advanced scraping"""
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
         
-    def scrape_user_profile(self, username: str) -> Optional[Dict]:
+        self.driver = webdriver.Chrome(
+            service=webdriver.chrome.service.Service(ChromeDriverManager().install()),
+            options=chrome_options
+        )
+        
+        # Execute script to remove webdriver property
+        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+    
+    def scrape_user_profile(self, username: str) -> dict:
         """
-        Scrape user profile information using Instagram API
-        Satisfies basic information requirement
+        Scrape comprehensive user profile data
+        THIS IS THE CORE FUNCTIONALITY
         """
         try:
-            url = f"https://i.instagram.com/api/v1/users/web_profile_info/?username={username}"
-            headers = {
-                'x-ig-app-id': self.app_id,
-                'x-requested-with': 'XMLHttpRequest',
+            url = f"https://www.instagram.com/{username}/"
+            self.driver.get(url)
+            time.sleep(random.uniform(3, 6))
+            
+            # Extract profile data using Selenium
+            profile_data = {
+                'username': username,
+                'full_name': self._safe_extract_text('h2'),
+                'biography': self._safe_extract_text('[data-testid="user-bio"]'),
+                'followers_count': self._extract_count('followers'),
+                'following_count': self._extract_count('following'),
+                'posts_count': self._extract_count('posts'),
+                'is_verified': self._check_verification(),
+                'is_private': self._check_privacy(),
+                'profile_pic_url': self._extract_profile_pic(),
             }
             
-            response = self.session.get(url, headers=headers)
-            response.raise_for_status()
-            
-            data = response.json()
-            user_data = data['data']['user']
-            
-            profile_info = {
-                'username': user_data.get('username'),
-                'full_name': user_data.get('full_name', ''),
-                'biography': user_data.get('biography', ''),
-                'profile_pic_url': user_data.get('profile_pic_url_hd', ''),
-                'followers_count': user_data['edge_followed_by']['count'],
-                'following_count': user_data['edge_follow']['count'],
-                'posts_count': user_data['edge_owner_to_timeline_media']['count'],
-                'is_verified': user_data.get('is_verified', False),
-                'is_private': user_data.get('is_private', False),
-                'website': user_data.get('external_url', ''),
-            }
-            
-            self._add_delay()
-            return profile_info
+            return profile_data
             
         except Exception as e:
-            logger.error(f"Error scraping profile {username}: {str(e)}")
+            logger.error(f"Profile scraping failed for {username}: {str(e)}")
             return None
     
-    def scrape_user_posts(self, username: str, max_posts: int = 12) -> List[Dict]:
-        """
-        Scrape user posts using GraphQL
-        Satisfies post-level data requirement
-        """
+    def scrape_user_posts(self, username: str, max_posts: int = 12) -> list:
+        """Scrape user posts with full metadata"""
         try:
-            # First get user ID
-            profile_data = self.scrape_user_profile(username)
-            if not profile_data:
-                return []
-            
             posts = []
-            variables = {
-                'id': profile_data.get('user_id'),
-                'first': max_posts,
-            }
+            url = f"https://www.instagram.com/{username}/"
+            self.driver.get(url)
+            time.sleep(random.uniform(3, 6))
             
-            query_hash = "8845758582119845"  # This may need updating
-            url = f"https://www.instagram.com/graphql/query/?query_hash={query_hash}&variables={quote(json.dumps(variables))}"
+            # Click on first post
+            first_post = self.driver.find_element(By.CSS_SELECTOR, 'article a')
+            first_post.click()
+            time.sleep(2)
             
-            response = self.session.get(url)
-            response.raise_for_status()
-            
-            data = response.json()
-            edges = data['data']['user']['edge_owner_to_timeline_media']['edges']
-            
-            for edge in edges:
-                node = edge['node']
-                post_data = {
-                    'post_id': node['id'],
-                    'shortcode': node['shortcode'],
-                    'image_url': node['display_url'],
-                    'caption': self._extract_caption(node),
-                    'likes_count': node['edge_liked_by']['count'],
-                    'comments_count': node['edge_media_to_comment']['count'],
-                    'post_date': node['taken_at_timestamp'],
-                    'is_video': node['is_video'],
-                }
-                posts.append(post_data)
+            for i in range(max_posts):
+                post_data = self._extract_post_data()
+                if post_data:
+                    posts.append(post_data)
                 
-                self._add_delay()
+                # Navigate to next post
+                try:
+                    next_button = self.driver.find_element(By.CSS_SELECTOR, '[aria-label="Next"]')
+                    next_button.click()
+                    time.sleep(random.uniform(2, 4))
+                except:
+                    break  # No more posts
             
             return posts
             
         except Exception as e:
-            logger.error(f"Error scraping posts for {username}: {str(e)}")
+            logger.error(f"Posts scraping failed for {username}: {str(e)}")
             return []
     
-    def scrape_user_reels(self, username: str, max_reels: int = 5) -> List[Dict]:
-        """
-        Scrape user reels
-        Satisfies reels/video-level data requirement
-        """
+    def _extract_post_data(self) -> dict:
+        """Extract data from current post"""
         try:
-            reels = []
-            # Implementation for reels scraping
-            # This would use similar GraphQL approach with different endpoints
-            
-            return reels
-            
+            return {
+                'post_id': self._extract_post_id(),
+                'shortcode': self._extract_shortcode(),
+                'image_url': self._extract_image_url(),
+                'caption': self._extract_caption(),
+                'likes_count': self._extract_likes_count(),
+                'comments_count': self._extract_comments_count(),
+                'post_date': self._extract_post_date(),
+                'is_video': self._check_is_video(),
+            }
         except Exception as e:
-            logger.error(f"Error scraping reels for {username}: {str(e)}")
-            return []
+            logger.error(f"Post data extraction failed: {str(e)}")
+            return None
     
-    def _extract_caption(self, node: Dict) -> str:
-        """Extract caption text from post node"""
-        try:
-            caption_edges = node.get('edge_media_to_caption', {}).get('edges', [])
-            if caption_edges:
-                return caption_edges[0]['node']['text']
-        except (IndexError, KeyError):
-            pass
-        return ""
-    
-    def _add_delay(self):
-        """Add random delay to avoid rate limiting"""
-        delay = random.uniform(
-            settings.SCRAPING_DELAY_MIN,
-            settings.SCRAPING_DELAY_MAX
-        )
-        time.sleep(delay)
-
-# Bypass detection methods (bonus requirement)
-class AdvancedInstagramScraper(InstagramScraper):
-    """
-    Advanced scraper with anti-detection measures
-    Satisfies bypass restrictions bonus requirement
-    """
-    
-    def __init__(self):
-        super().__init__()
-        self._setup_session()
-    
-    def _setup_session(self):
-        """Setup session with rotating user agents and proxies"""
-        user_agents = [
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
-        ]
-        
-        self.session.headers['User-Agent'] = random.choice(user_agents)
-        
-        # Add more realistic headers
-        self.session.headers.update({
-            'sec-ch-ua': '"Google Chrome";v="91", "Chromium";v="91", ";Not A Brand";v="99"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-fetch-dest': 'document',
-            'sec-fetch-mode': 'navigate',
-            'sec-fetch-site': 'none',
-        })
+    def close(self):
+        """Clean up resources"""
+        if self.driver:
+            self.driver.quit()

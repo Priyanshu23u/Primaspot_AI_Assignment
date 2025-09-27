@@ -55,3 +55,4 @@ class Influencer(models.Model):
                 self.engagement_rate = ((self.avg_likes + self.avg_comments) / self.followers_count) * 100
             
             self.save()
+
