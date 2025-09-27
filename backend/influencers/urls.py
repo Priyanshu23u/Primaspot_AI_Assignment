@@ -16,7 +16,7 @@ urlpatterns = [
     # GET /api/v1/influencers/{id}/ -> retrieve()  
     # GET /api/v1/influencers/search/ -> search() [@action]
     path('', include(router.urls)),
-    
+    path('health/', views.APIHealthView.as_view(), name='api-health'),
     # Custom API Views - WORKING (matches your implemented APIViews)
     path('<int:influencer_id>/analytics/', 
          views.InfluencerAnalyticsAPIView.as_view(), 

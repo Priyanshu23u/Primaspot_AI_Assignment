@@ -48,7 +48,7 @@ urlpatterns = [
     path('api/schema/', schema_view.without_ui(cache_timeout=0), name='api-schema'),
     
     # 🌟 WORKING API ENDPOINTS - ALL REQUIREMENTS COVERED
-    
+    path('api/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     # Core APIs - WORKING
     path('api/v1/influencers/', include('influencers.urls')),
     path('api/v1/posts/', include('posts.urls')),  

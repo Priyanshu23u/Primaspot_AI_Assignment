@@ -27,9 +27,9 @@ class Reel(models.Model):
     duration = models.IntegerField(default=0)  # Duration in seconds
     
     # AI/ML Video Analysis Results (ADVANCED REQUIREMENTS - Point 2)
-    detected_events = ArrayField(models.CharField(max_length=100), default=list, blank=True)
+    detected_events = models.TextField(default='[]', blank=True, help_text="JSON list of detected events")
     vibe_classification = models.CharField(max_length=50, blank=True, null=True, db_index=True)
-    descriptive_tags = ArrayField(models.CharField(max_length=50), default=list, blank=True)
+    descriptive_tags = models.TextField(default='[]', blank=True, help_text="JSON list of descriptive tags")
     
     # Analysis Status
     is_analyzed = models.BooleanField(default=False, db_index=True)

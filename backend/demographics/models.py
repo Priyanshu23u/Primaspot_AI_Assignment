@@ -24,12 +24,10 @@ class AudienceDemographics(models.Model):
     female_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=50.00)
     
     # Geographic Distribution (BONUS FEATURE)
-    top_countries = ArrayField(models.CharField(max_length=50), default=list, blank=True)
-    top_cities = ArrayField(models.CharField(max_length=50), default=list, blank=True)
-    
-    # Activity Patterns (BONUS FEATURE)
-    peak_activity_hours = ArrayField(models.IntegerField(), default=list, blank=True)
-    most_active_days = ArrayField(models.CharField(max_length=10), default=list, blank=True)
+    top_countries = models.TextField(default='[]', blank=True, help_text="JSON list of countries")
+    top_cities = models.TextField(default='[]', blank=True, help_text="JSON list of cities")
+    peak_activity_hours = models.TextField(default='[]', blank=True, help_text="JSON list of hours")
+    most_active_days = models.TextField(default='[]', blank=True, help_text="JSON list of days")
     
     # Inference Metadata
     confidence_score = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
