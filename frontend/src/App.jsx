@@ -1,52 +1,50 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from './hooks/useAuth'
-import Layout from './components/common/Layout/Layout'
-import LoadingSpinner from './components/common/UI/LoadingSpinner'
+import { Routes, Route } from 'react-router-dom'
 
-// Page imports
+// Import pages
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
-import Influencers from './pages/Influencers'
-import Posts from './pages/Posts'
-import Reels from './pages/Reels'
-import Analytics from './pages/Analytics'
-import Demographics from './pages/Demographics'
-import Settings from './pages/Settings'
 import Profile from './pages/Profile'
+import Settings from './pages/Settings'
 import NotFound from './pages/NotFound'
+import Demographics from './pages/Demographics'
 
 function App() {
-  const { isLoading } = useAuth()
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    )
-  }
-
   return (
-    <div className="App">
+    <div className="min-h-screen bg-gray-50">
       <Routes>
-        {/* Public route */}
         <Route path="/" element={<Home />} />
         
-        {/* Protected routes with layout */}
-        <Route path="/app" element={<Layout />}>
-          <Route index element={<Navigate to="/app/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="influencers" element={<Influencers />} />
-          <Route path="posts" element={<Posts />} />
-          <Route path="reels" element={<Reels />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="demographics" element={<Demographics />} />
-          <Route path="settings" element={<Settings />} />
-          <Route path="profile" element={<Profile />} />
-        </Route>
+        <Route path="/app" element={
+          <div className="min-h-screen bg-gray-50">
+            <nav className="bg-white shadow-sm">
+              <div className="max-w-7xl mx-auto px-4">
+                <div className="flex items-center justify-between h-16">
+                  <h1 className="text-xl font-bold text-gray-800">
+                    Instagram Analytics
+                  </h1>
+                  <div className="flex space-x-4">
+                    <a href="/app/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</a>
+                    <a href="/profile" className="text-gray-600 hover:text-gray-900">Profile</a>
+                    <a href="/settings" className="text-gray-600 hover:text-gray-900">Settings</a>
+                  </div>
+                </div>
+              </div>
+            </nav>
+            <main className="max-w-7xl mx-auto">
+              <Routes>
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="demographics" element={<Demographics />} />
+              </Routes>
+            </main>
+          </div>
+        } />
         
-        {/* 404 route */}
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/demographics" element={<Demographics />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
