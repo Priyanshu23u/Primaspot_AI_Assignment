@@ -51,6 +51,10 @@ INSTALLED_APPS = [
     'scraping',
     'analytics',
     'demographics',
+   
+    
+    'django_extensions',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

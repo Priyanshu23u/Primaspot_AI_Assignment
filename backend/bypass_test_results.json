@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "method": "browser_selenium",
+  "profile_data": {
+    "username": "zindagii_gulzar_hai_",
+    "full_name": "Zindagii_Gulzar_Hai_",
+    "followers_count": 0,
+    "following_count": 0,
+    "posts_count": 0,
+    "bio": "",
+    "is_verified": false,
+    "profile_pic_url": ""
+  },
+  "posts_data": [],
+  "extracted_at": "2025-09-29T16:28:12.583217"
+}

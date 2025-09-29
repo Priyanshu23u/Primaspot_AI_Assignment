@@ -1,0 +1,42 @@
+{
+  "success": true,
+  "method": "improved_selenium",
+  "profile_data": {
+    "username": "zindagii_gulzar_hai_",
+    "full_name": "prateek writes\u270d\ufe0f\u270d\ufe0f",
+    "followers_count": 4662,
+    "following_count": 5374,
+    "posts_count": 375,
+    "bio": "prateek writes\u270d\ufe0f\u270d\ufe0f",
+    "is_verified": true,
+    "profile_pic_url": ""
+  },
+  "posts_data": [
+    {
+      "post_number": 1,
+      "post_url": "https://www.instagram.com/zindagii_gulzar_hai_/reel/DPGlIE-iEc0/",
+      "likes_count": 184,
+      "comments_count": 47,
+      "extraction_method": "selenium_basic"
+    },
+    {
+      "post_number": 2,
+      "post_url": "https://www.instagram.com/zindagii_gulzar_hai_/reel/DN_UTrwiAyv/",
+      "likes_count": 442,
+      "comments_count": 16,
+      "extraction_method": "selenium_basic"
+    },
+    {
+      "post_number": 3,
+      "post_url": "https://www.instagram.com/zindagii_gulzar_hai_/reel/DKZFySXTV-A/",
+      "likes_count": 151,
+      "comments_count": 34,
+      "extraction_method": "selenium_basic"
+    }
+  ],
+  "extraction_details": {
+    "page_title": "prateek writes\u270d\ufe0f\u270d\ufe0f (@zindagii_gulzar_hai_) \u2022 Instagram photos and videos",
+    "current_url": "https://www.instagram.com/zindagii_gulzar_hai_/",
+    "page_loaded": true
+  }
+}

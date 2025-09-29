@@ -1,67 +1,66 @@
-# influencers/models.py
-from django.db import models
-from django.utils import timezone
+﻿from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+import json
 
 class Influencer(models.Model):
-    """
-    Core Influencer Model - Stores all basic information (MANDATORY REQUIREMENTS)
-    """
-    # Basic Information (MANDATORY)
+    CATEGORY_CHOICES = [
+        ('fitness', 'Fitness & Health'),
+        ('technology', 'Technology'),
+        ('travel', 'Travel & Adventure'),
+        ('food', 'Food & Cooking'),
+        ('fashion', 'Fashion & Style'),
+        ('lifestyle', 'Lifestyle'),
+        ('business', 'Business'),
+        ('entertainment', 'Entertainment'),
+    ]
+    
+    # Basic Information
     username = models.CharField(max_length=100, unique=True, db_index=True)
-    full_name = models.CharField(max_length=200, blank=True, null=True)
-    profile_pic_url = models.URLField(max_length=500, blank=True, null=True)
-    bio = models.TextField(blank=True, null=True)
+    full_name = models.CharField(max_length=200, blank=True)
+    bio = models.TextField(blank=True)
+    profile_pic_url = models.URLField(blank=True)
+    external_url = models.URLField(blank=True)
     
-    # Follower Metrics (MANDATORY)
-    followers_count = models.BigIntegerField(default=0, db_index=True)
-    following_count = models.BigIntegerField(default=0)
-    posts_count = models.BigIntegerField(default=0)
+    # Metrics
+    followers_count = models.IntegerField(default=0)
+    following_count = models.IntegerField(default=0)
+    posts_count = models.IntegerField(default=0)
     
-    # Verification & Status
+    # Status
     is_verified = models.BooleanField(default=False)
     is_private = models.BooleanField(default=False)
     is_business = models.BooleanField(default=False)
     
-    # Engagement Analytics (MANDATORY)
-    engagement_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, db_index=True)
-    avg_likes = models.DecimalField(max_digits=15, decimal_places=0, default=0)
-    avg_comments = models.DecimalField(max_digits=15, decimal_places=0, default=0)
+    # Classification
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='lifestyle')
     
-    # Scraping Metadata
-    last_scraped = models.DateTimeField(blank=True, null=True)
-    last_analyzed = models.DateTimeField(blank=True, null=True)
-    scrape_count = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=True)
+    # Calculated Metrics
+    engagement_rate = models.FloatField(
+        default=0.0, 
+        validators=[MinValueValidator(0.0), MaxValueValidator(100.0)]
+    )
+    avg_likes = models.IntegerField(default=0)
+    avg_comments = models.IntegerField(default=0)
+    avg_views = models.IntegerField(default=0)
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_scraped = models.DateTimeField(null=True, blank=True)
+    
+    # ML Analysis Results
+    content_themes = models.JSONField(default=dict, blank=True)
+    posting_patterns = models.JSONField(default=dict, blank=True)
+    audience_insights = models.JSONField(default=dict, blank=True)
     
     class Meta:
-        db_table = 'influencers'
         ordering = ['-followers_count']
-        indexes = [
-            models.Index(fields=['username']),
-            models.Index(fields=['followers_count']),
-            models.Index(fields=['engagement_rate']),
-            models.Index(fields=['is_verified']),
-        ]
-    
+        
     def __str__(self):
-        return f"@{self.username} ({self.followers_count:,} followers)"
+        return f"@{self.username}"
     
     @property
-    def engagement_rate_display(self):
-        return f"{self.engagement_rate}%"
-    
-    @property
-    def follower_tier(self):
-        """Categorize influencer by follower count"""
-        if self.followers_count >= 1000000:
-            return "Mega Influencer"
-        elif self.followers_count >= 100000:
-            return "Macro Influencer"
-        elif self.followers_count >= 10000:
-            return "Mid Influencer"
-        else:
-            return "Micro Influencer"
+    def engagement_score(self):
+        if self.followers_count > 0:
+            return ((self.avg_likes + self.avg_comments) / self.followers_count) * 100
+        return 0

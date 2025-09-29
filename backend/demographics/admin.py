@@ -1,35 +1,39 @@
-# demographics/admin.py
-from django.contrib import admin
-from django.utils.html import format_html
-from .models import AudienceDemographics
+﻿from django.contrib import admin
+from .models import Demographics
 
-@admin.register(AudienceDemographics)
-class AudienceDemographicsAdmin(admin.ModelAdmin):
+@admin.register(Demographics)
+class DemographicsAdmin(admin.ModelAdmin):
     list_display = [
-        'influencer', 'dominant_age_group', 'dominant_gender', 
-        'confidence_score', 'inference_date'
+        'influencer', 'total_followers_analyzed', 'confidence_score', 
+        'male_percentage', 'female_percentage', 'last_updated'
     ]
-    list_filter = ['confidence_score', 'inference_date']
-    search_fields = ['influencer__username', 'top_countries', 'top_cities']
-    readonly_fields = ['created_at', 'updated_at']
+    list_filter = ['last_updated', 'confidence_score']
+    search_fields = ['influencer__username']
+    readonly_fields = ['last_updated']
     
     fieldsets = (
-        ('Influencer', {
-            'fields': ('influencer',)
+        ('Overview', {
+            'fields': ('influencer', 'total_followers_analyzed', 'confidence_score', 'data_points_used')
         }),
         ('Age Distribution', {
             'fields': ('age_13_17', 'age_18_24', 'age_25_34', 'age_35_44', 'age_45_54', 'age_55_plus')
         }),
         ('Gender Distribution', {
-            'fields': ('male_percentage', 'female_percentage')
+            'fields': ('male_percentage', 'female_percentage', 'other_percentage')
         }),
-        ('Geographic Data', {
-            'fields': ('top_countries', 'top_cities')
+        ('Geographic & Interest Data', {
+            'fields': ('top_countries', 'top_cities', 'top_languages', 'interest_categories'),
+            'classes': ('collapse',)
         }),
         ('Activity Patterns', {
-            'fields': ('peak_activity_hours', 'most_active_days')
+            'fields': ('peak_activity_hours', 'engagement_by_day', 'device_distribution'),
+            'classes': ('collapse',)
         }),
-        ('Inference Metadata', {
-            'fields': ('confidence_score', 'inference_date', 'data_points_used')
-        })
+        ('Quality Metrics', {
+            'fields': ('fake_followers_percentage', 'inactive_followers_percentage', 'high_quality_followers_percentage'),
+            'classes': ('collapse',)
+        }),
+        ('Timestamps', {
+            'fields': ('last_updated', 'next_update_scheduled')
+        }),
     )

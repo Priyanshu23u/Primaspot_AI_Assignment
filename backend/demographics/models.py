@@ -1,64 +1,58 @@
-# demographics/models.py
-from django.db import models
-from django.contrib.postgres.fields import ArrayField
+﻿from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from influencers.models import Influencer
 
-class AudienceDemographics(models.Model):
-    """
-    Audience Demographics Model (BONUS FEATURE)
-    AI-inferred audience demographics based on content analysis
-    """
-    # Relationships
+class Demographics(models.Model):
     influencer = models.OneToOneField(Influencer, on_delete=models.CASCADE, related_name='demographics')
     
-    # Age Distribution (BONUS FEATURE)
-    age_13_17 = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-    age_18_24 = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-    age_25_34 = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-    age_35_44 = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-    age_45_54 = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-    age_55_plus = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-    
-    # Gender Distribution (BONUS FEATURE)
-    male_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=50.00)
-    female_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=50.00)
-    
-    # Geographic Distribution (BONUS FEATURE)
-    top_countries = models.TextField(default='[]', blank=True, help_text="JSON list of countries")
-    top_cities = models.TextField(default='[]', blank=True, help_text="JSON list of cities")
-    peak_activity_hours = models.TextField(default='[]', blank=True, help_text="JSON list of hours")
-    most_active_days = models.TextField(default='[]', blank=True, help_text="JSON list of days")
-    
-    # Inference Metadata
-    confidence_score = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
-    inference_date = models.DateTimeField(auto_now=True)
+    # Audience Size Analysis
+    total_followers_analyzed = models.IntegerField(default=0)
+    confidence_score = models.FloatField(
+        default=0.0,
+        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)]
+    )
     data_points_used = models.IntegerField(default=0)
     
+    # Age Distribution (percentages)
+    age_13_17 = models.FloatField(default=0.0)
+    age_18_24 = models.FloatField(default=0.0)
+    age_25_34 = models.FloatField(default=0.0)
+    age_35_44 = models.FloatField(default=0.0)
+    age_45_54 = models.FloatField(default=0.0)
+    age_55_plus = models.FloatField(default=0.0)
+    
+    # Gender Distribution (percentages)
+    male_percentage = models.FloatField(default=0.0)
+    female_percentage = models.FloatField(default=0.0)
+    other_percentage = models.FloatField(default=0.0)
+    
+    # Geographic Data
+    top_countries = models.JSONField(default=list, blank=True)
+    top_cities = models.JSONField(default=list, blank=True)
+    top_languages = models.JSONField(default=list, blank=True)
+    
+    # Interest Categories
+    interest_categories = models.JSONField(default=list, blank=True)
+    
+    # Device & Platform Data
+    device_distribution = models.JSONField(default=dict, blank=True)
+    platform_usage = models.JSONField(default=dict, blank=True)
+    
+    # Activity Patterns
+    peak_activity_hours = models.JSONField(default=list, blank=True)
+    engagement_by_day = models.JSONField(default=dict, blank=True)
+    
+    # Follower Quality
+    fake_followers_percentage = models.FloatField(default=0.0)
+    inactive_followers_percentage = models.FloatField(default=0.0)
+    high_quality_followers_percentage = models.FloatField(default=0.0)
+    
     # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    next_update_scheduled = models.DateTimeField(null=True, blank=True)
     
     class Meta:
-        db_table = 'audience_demographics'
-        verbose_name_plural = 'Audience Demographics'
-    
+        verbose_name_plural = "Demographics"
+        
     def __str__(self):
         return f"Demographics for @{self.influencer.username}"
-    
-    @property
-    def dominant_age_group(self):
-        """Get the age group with highest percentage"""
-        age_groups = {
-            '13-17': self.age_13_17,
-            '18-24': self.age_18_24,
-            '25-34': self.age_25_34,
-            '35-44': self.age_35_44,
-            '45-54': self.age_45_54,
-            '55+': self.age_55_plus
-        }
-        return max(age_groups, key=age_groups.get)
-    
-    @property
-    def dominant_gender(self):
-        """Get the dominant gender"""
-        return 'Male' if self.male_percentage > self.female_percentage else 'Female'

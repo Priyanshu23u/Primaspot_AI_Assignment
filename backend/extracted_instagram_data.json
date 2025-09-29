@@ -1,0 +1,380 @@
+{
+  "extraction_timestamp": "2025-09-28T16:05:57.749975",
+  "username": "zindagii_gulzar_hai_",
+  "extraction_success": true,
+  "data_source": "demo_dataset",
+  "profile_data": {
+    "username": "zindagii_gulzar_hai_",
+    "full_name": "Demo Zindagii_Gulzar_Hai_",
+    "profile_pic_url": "https://picsum.photos/200/200?random=profile",
+    "bio": "Demo profile for @zindagii_gulzar_hai_ \u2022 Content Creator \u2022 \ud83d\udce7 demo@email.com",
+    "followers_count": 11525,
+    "following_count": 1393,
+    "posts_count": 545,
+    "is_verified": false,
+    "is_private": false,
+    "category": "lifestyle",
+    "scraped_at": "2025-09-28T16:05:57.749975"
+  },
+  "posts_data": [
+    {
+      "shortcode": "demo_post_1",
+      "caption": "Demo post 1 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "video",
+      "media_url": "https://picsum.photos/800/800?random=0",
+      "thumbnail_url": "https://picsum.photos/400/400?random=0",
+      "likes_count": 3029,
+      "comments_count": 183,
+      "posted_at": "2025-09-28T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": true,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_post_2",
+      "caption": "Demo post 2 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "photo",
+      "media_url": "https://picsum.photos/800/800?random=1",
+      "thumbnail_url": "https://picsum.photos/400/400?random=1",
+      "likes_count": 1269,
+      "comments_count": 184,
+      "posted_at": "2025-09-26T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": false,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_post_3",
+      "caption": "Demo post 3 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "photo",
+      "media_url": "https://picsum.photos/800/800?random=2",
+      "thumbnail_url": "https://picsum.photos/400/400?random=2",
+      "likes_count": 1195,
+      "comments_count": 183,
+      "posted_at": "2025-09-24T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": false,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_post_4",
+      "caption": "Demo post 4 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "video",
+      "media_url": "https://picsum.photos/800/800?random=3",
+      "thumbnail_url": "https://picsum.photos/400/400?random=3",
+      "likes_count": 2682,
+      "comments_count": 196,
+      "posted_at": "2025-09-22T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": true,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_post_5",
+      "caption": "Demo post 5 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "photo",
+      "media_url": "https://picsum.photos/800/800?random=4",
+      "thumbnail_url": "https://picsum.photos/400/400?random=4",
+      "likes_count": 3068,
+      "comments_count": 140,
+      "posted_at": "2025-09-20T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": false,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_post_6",
+      "caption": "Demo post 6 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "photo",
+      "media_url": "https://picsum.photos/800/800?random=5",
+      "thumbnail_url": "https://picsum.photos/400/400?random=5",
+      "likes_count": 4493,
+      "comments_count": 42,
+      "posted_at": "2025-09-18T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": false,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_post_7",
+      "caption": "Demo post 7 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "video",
+      "media_url": "https://picsum.photos/800/800?random=6",
+      "thumbnail_url": "https://picsum.photos/400/400?random=6",
+      "likes_count": 814,
+      "comments_count": 25,
+      "posted_at": "2025-09-16T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": true,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_post_8",
+      "caption": "Demo post 8 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "photo",
+      "media_url": "https://picsum.photos/800/800?random=7",
+      "thumbnail_url": "https://picsum.photos/400/400?random=7",
+      "likes_count": 1416,
+      "comments_count": 166,
+      "posted_at": "2025-09-14T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": false,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_post_9",
+      "caption": "Demo post 9 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "photo",
+      "media_url": "https://picsum.photos/800/800?random=8",
+      "thumbnail_url": "https://picsum.photos/400/400?random=8",
+      "likes_count": 4454,
+      "comments_count": 197,
+      "posted_at": "2025-09-12T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": false,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_post_10",
+      "caption": "Demo post 10 for @zindagii_gulzar_hai_ - Beautiful content! #demo #instagram #content",
+      "media_type": "video",
+      "media_url": "https://picsum.photos/800/800?random=9",
+      "thumbnail_url": "https://picsum.photos/400/400?random=9",
+      "likes_count": 2404,
+      "comments_count": 118,
+      "posted_at": "2025-09-10T16:05:57.749975",
+      "hashtags": [
+        "demo",
+        "instagram",
+        "content",
+        "social",
+        "media"
+      ],
+      "mentions": [
+        "friend1",
+        "brand2"
+      ],
+      "location": "Demo Location",
+      "is_video": true,
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    }
+  ],
+  "reels_data": [
+    {
+      "shortcode": "demo_reel_1",
+      "caption": "Demo reel 1 for @zindagii_gulzar_hai_ - Amazing video content! \ud83c\udfac #reels #video",
+      "video_url": "https://example.com/reel_1.mp4",
+      "thumbnail_url": "https://picsum.photos/400/600?random=10",
+      "views_count": 91313,
+      "likes_count": 3682,
+      "comments_count": 216,
+      "duration": 34,
+      "posted_at": "2025-09-28T16:05:57.749975",
+      "hashtags": [
+        "reels",
+        "video",
+        "content",
+        "trending"
+      ],
+      "mentions": [
+        "creator1",
+        "brand2"
+      ],
+      "location": "Demo Studio",
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_reel_2",
+      "caption": "Demo reel 2 for @zindagii_gulzar_hai_ - Amazing video content! \ud83c\udfac #reels #video",
+      "video_url": "https://example.com/reel_2.mp4",
+      "thumbnail_url": "https://picsum.photos/400/600?random=11",
+      "views_count": 11246,
+      "likes_count": 3100,
+      "comments_count": 239,
+      "duration": 41,
+      "posted_at": "2025-09-25T16:05:57.749975",
+      "hashtags": [
+        "reels",
+        "video",
+        "content",
+        "trending"
+      ],
+      "mentions": [
+        "creator1",
+        "brand2"
+      ],
+      "location": "Demo Studio",
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_reel_3",
+      "caption": "Demo reel 3 for @zindagii_gulzar_hai_ - Amazing video content! \ud83c\udfac #reels #video",
+      "video_url": "https://example.com/reel_3.mp4",
+      "thumbnail_url": "https://picsum.photos/400/600?random=12",
+      "views_count": 98469,
+      "likes_count": 6551,
+      "comments_count": 152,
+      "duration": 44,
+      "posted_at": "2025-09-22T16:05:57.749975",
+      "hashtags": [
+        "reels",
+        "video",
+        "content",
+        "trending"
+      ],
+      "mentions": [
+        "creator1",
+        "brand2"
+      ],
+      "location": "Demo Studio",
+      "scraped_at": "2025-09-28T16:05:57.749975"
+    },
+    {
+      "shortcode": "demo_reel_4",
+      "caption": "Demo reel 4 for @zindagii_gulzar_hai_ - Amazing video content! \ud83c\udfac #reels #video",
+      "video_url": "https://example.com/reel_4.mp4",
+      "thumbnail_url": "https://picsum.photos/400/600?random=13",
+      "views_count": 32509,
+      "likes_count": 6267,
+      "comments_count": 201,
+      "duration": 27,
+      "posted_at": "2025-09-19T16:05:57.749975",
+      "hashtags": [
+        "reels",
+        "video",
+        "content",
+        "trending"
+      ],
+      "mentions": [
+        "creator1",
+        "brand2"
+      ],
+      "location": "Demo Studio",
+      "scraped_at": "2025-09-28T16:05:57.751990"
+    },
+    {
+      "shortcode": "demo_reel_5",
+      "caption": "Demo reel 5 for @zindagii_gulzar_hai_ - Amazing video content! \ud83c\udfac #reels #video",
+      "video_url": "https://example.com/reel_5.mp4",
+      "thumbnail_url": "https://picsum.photos/400/600?random=14",
+      "views_count": 80635,
+      "likes_count": 6534,
+      "comments_count": 186,
+      "duration": 31,
+      "posted_at": "2025-09-16T16:05:57.751990",
+      "hashtags": [
+        "reels",
+        "video",
+        "content",
+        "trending"
+      ],
+      "mentions": [
+        "creator1",
+        "brand2"
+      ],
+      "location": "Demo Studio",
+      "scraped_at": "2025-09-28T16:05:57.751990"
+    }
+  ],
+  "engagement_analytics": {},
+  "note": "Demo data generated due to Instagram rate limiting"
+}
